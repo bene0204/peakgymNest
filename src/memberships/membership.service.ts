@@ -7,6 +7,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { msDto } from './dtos';
+import { msPatchDto } from './dtos/membership-patch.dto';
 import { Membership } from './membership.model';
 
 @Injectable()
@@ -36,18 +37,33 @@ export class MembershipService {
     }
   }
 
-  async editMemberShip(mId: string, body: msDto){
+  async editMemberShip(mId: string, body: msPatchDto) {
+    const updates = Object.keys(body);
+
     try {
-      let membership = this.msModel.findById(mId);
+      const membership = await this.msModel.findById(mId);
       if (!membership) return new NotFoundException();
 
-      membership = {
-        ...membership,
-        ...body,
-      }
+      updates.forEach((update) => {
+        membership[update] = body[update];
+      });
+
+      await membership.save();
+
+      return membership;
     } catch (error) {
       return error;
     }
-    
+  }
+
+  async deleteMemberShipById(mId: string) {
+    try {
+      const deletedMembership = await this.msModel.findByIdAndDelete(mId);
+      if (!deletedMembership) throw new NotFoundException();
+
+      return deletedMembership;
+    } catch (error) {
+      return error;
+    }
   }
 }

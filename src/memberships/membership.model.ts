@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import validator from 'validator';
 
 export const MembershipSchema = new mongoose.Schema({
   name: {
